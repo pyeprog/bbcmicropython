@@ -27,6 +27,8 @@
 #include <stdint.h>
 
 // Options to control how MicroPython is built, overriding defaults in py/mpconfig.h
+#define MICROPY_MODULE_FROZEN  (1)
+#define MICROPY_MODULE_FROZEN_STR  (1)
 
 // object representation
 #define MICROPY_OBJ_REPR            (MICROPY_OBJ_REPR_C)
