@@ -1,18 +1,38 @@
-MicroPython for the BBC micro:bit
-=================================
+# How to insert your frozen-module into the .hex file 
 
-This is the source code for MicroPython running on the BBC micro:bit!
+I think I have found the solution.
+It turns out, the output of compile contains nothing about the frozen module, which is because I use the old version of make-frozen.py (of the v1.7 of micropython). 
 
-To get involved with the micro:bit community join the Slack channel by signing up here:
-https://tech.microbit.org/get-involved/where-to-find/
+The whole procedure to make your own frozen module should be like this:
 
-Various things are in this repository, including:
-- Source code in source/ and inc/ directories.
-- Example Python programs in the examples/ directory.
-- Tools in the tools/ directory.
+1. Get the [micropython/micropython](https://github.com/micropython/micropython)
+2. In its tool folder, find the make-frozen.py. Make sure you are on the master branch, not some old version of it.
+3. Write your own .py file and put it in a folder
+4. Transform .py to .c, `python  make-frozen.py  your_folder_path  >  frozen_module.c`
+5. Open `frozen_module.c` and check its the module name, you could probably change the module name in the file.
+6. Put your `frozen_module.c` to the `micropython/source/py`. `**CAUTION: make sure you only put one .c file of your own. Or a compile error will pop out**`
+7. (Not needed now, if you do it, it won't be compiled)Find the `mpconfigport.h` in `micropython/inc/microbit/`, open it and add 2 lines at line 30.
+```
+#define MICROPY_MODULE_FROZEN  (1)
+#define MICROPY_MODULE_FROZEN_STR  (1)
+```
 
-The source code is a yotta application and needs yotta to build, along
-with an ARM compiler toolchain (eg arm-none-eabi-gcc and friends).
+8. Build your compile tool chain. But [with a few tricks](https://github.com/bbcmicrobit/micropython/issues/514), if you are on ubuntu.
+Thank you shenki for analyse the issue and dpgeorge, rojer, and especially temporaryaccount for cracking the nut. 
+In case you can't find it. This is the solution given by temporaryaccount.
+
+> You could try to install the version of libnewlib-arm-* from Ubuntu cosmic?
+> Yes, I can confirm fixing the issue by installing the newer packages.
+> Just get the [libnewlib-dev (2.4.0.20160527-4)](https://packages.ubuntu.com/cosmic/all/libnewlib-dev/download) and [libnewlib-arm-none-eabi (2.4.0.20160527-4) *.deb](https://packages.ubuntu.com/cosmic/all/libnewlib-arm-none-eabi/download) files, then install them:
+>`sudo dpkg -i libnewlib-dev_2.4.0.20160527-4_all.deb libnewlib-arm-none-eabi_2.4.0.20160527-4_all.deb`
+
+> As of today, @temporaryaccount's instructions worked for Ubuntu 18.04.1 (but the versions provided at the links have been updated).
+> `sudo dpkg -i libnewlib-arm-none-eabi_3.0.0.20180802-2_all.deb libnewlib-dev_3.0.0.20180802-2_all.deb`
+
+
+I think on mac, I've met the same problem(not so sure, the similar part is success on compiling but fail on linking). If you have any solution to it, please please give a hint. Thank you!
+
+9. Follow front page [README.md](https://github.com/bbcmicrobit/micropython) to compile the project. If no ['ninja' error] occurs, then you made it.
 
 Ubuntu users can install the needed packages using:
 ```
@@ -45,35 +65,10 @@ if so, you could be prompted to create one as a part of the process.
   make all
   ```
 
-The resulting firmware.hex file to flash onto the device can be
-found in the build/ directory from the root of the repository.
+If you found it not working, remove yotta_modules, yotta_targets, .yotta.json and build/ and repeat the procedure.
 
-The Makefile provided does some extra preprocessing of the source,
-adds version information to the UICR region, puts the resulting
-firmware at build/firmware.hex, and includes some convenience targets.
+10. Find your .hex file in `micropython/build/xxxxxxxxxx/source/`
 
-How to use
-==========
+11. Send it to microbit. Then open the REPL and type: `help('modules')`, you should see your module listed below if you do it right.
 
-Upon reset you will have a REPL on the USB CDC serial port, with baudrate
-115200 (eg picocom /dev/ttyACM0 -b 115200).
-
-Then try:
-
-    >>> import microbit
-    >>> microbit.display.scroll('hello!')
-    >>> microbit.button_a.is_pressed()
-    >>> dir(microbit)
-
-Tab completion works and is very useful!
-
-Read our documentation here:
-
-https://microbit-micropython.readthedocs.io/en/latest/
-
-You can also use the tools/pyboard.py script to run Python scripts directly
-from your PC, eg:
-
-    $ ./tools/pyboard.py /dev/ttyACM0 examples/conway.py
-
-Be brave! Break things! Learn and have fun!
+12. Cheers!
