@@ -1,8 +1,6 @@
-# How to insert your frozen-module into the .hex file 
+# How to insert your frozen-module into the bbcmicropython project and compile a .hex file 
 
 I think I have found the solution.
-It turns out, the output of compile contains nothing about the frozen module, which is because I use the old version of make-frozen.py (of the v1.7 of micropython). 
-
 The whole procedure to make your own frozen module should be like this:
 
 1. Get the [micropython/micropython](https://github.com/micropython/micropython)
@@ -11,13 +9,7 @@ The whole procedure to make your own frozen module should be like this:
 4. Transform .py to .c, `python  make-frozen.py  your_folder_path  >  frozen_module.c`
 5. Open `frozen_module.c` and check its the module name, you could probably change the module name in the file.
 6. Put your `frozen_module.c` to the `micropython/source/py`. `**CAUTION: make sure you only put one .c file of your own. Or a compile error will pop out**`
-7. (Not needed now, if you do it, it won't be compiled)Find the `mpconfigport.h` in `micropython/inc/microbit/`, open it and add 2 lines at line 30.
-```
-#define MICROPY_MODULE_FROZEN  (1)
-#define MICROPY_MODULE_FROZEN_STR  (1)
-```
-
-8. Build your compile tool chain. But [with a few tricks](https://github.com/bbcmicrobit/micropython/issues/514), if you are on ubuntu.
+7. Build your compile tool chain. But [with a few tricks](https://github.com/bbcmicrobit/micropython/issues/514), if you are on ubuntu.
 Thank you shenki for analyse the issue and dpgeorge, rojer, and especially temporaryaccount for cracking the nut. 
 In case you can't find it. This is the solution given by temporaryaccount.
 
@@ -32,7 +24,7 @@ In case you can't find it. This is the solution given by temporaryaccount.
 
 I think on mac, I've met the same problem(not so sure, the similar part is success on compiling but fail on linking). If you have any solution to it, please please give a hint. Thank you!
 
-9. Follow front page [README.md](https://github.com/bbcmicrobit/micropython) to compile the project. If no ['ninja' error] occurs, then you made it.
+8. Follow front page [README.md](https://github.com/bbcmicrobit/micropython) to compile the project. If no ['ninja' error] occurs, then you made it.
 
 Ubuntu users can install the needed packages using:
 ```
